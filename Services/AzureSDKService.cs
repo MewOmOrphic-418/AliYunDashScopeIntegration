@@ -9,11 +9,11 @@ using System.ClientModel; // 添加这个using语句
 namespace WebApplication1.Services;
 
 /// <summary>
-/// AI 服务实现类
+/// Azure SDK AI 服务实现类
 /// 实现了与 Azure OpenAI 服务的交互功能
 /// 基于 OpenAI SDK 2.1.0 版本开发
 /// </summary>
-public class AIService : IAIService
+public class AzureSDKService : IAzureSDKService
 {
     /// <summary>
     /// OpenAI 客户端实例
@@ -34,7 +34,7 @@ public class AIService : IAIService
     /// <param name="aiConfig">AI 配置选项</param>
     /// <exception cref="ArgumentNullException">当配置为空时抛出</exception>
     /// <exception cref="InvalidOperationException">当必需配置缺失时抛出</exception>
-    public AIService(IOptions<AIConfig> aiConfig)
+    public AzureSDKService(IOptions<AIConfig> aiConfig)
     {
         _aiConfig = aiConfig.Value ?? throw new ArgumentNullException(nameof(aiConfig));
         

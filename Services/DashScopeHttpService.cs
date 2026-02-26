@@ -152,4 +152,56 @@ public class DashScopeHttpService : IDashScopeHttpService
             
         return responseObject;
     }
+    
+    /// <summary>
+    /// 异步获取文本嵌入向量（数组格式）
+    /// </summary>
+    /// <param name="text">待转换的文本内容</param>
+    /// <returns>浮点数只读列表</returns>
+    public async Task<IReadOnlyList<float>> GetEmbeddingsAsync(string text)
+    {
+        // 构建嵌入向量请求对象
+        var request = new
+        {
+            model = !string.IsNullOrEmpty(_aiConfig.ModelName) ? _aiConfig.ModelName : "text-embedding-v1",
+            input = new { text = text }
+        };
+
+        // 序列化请求对象
+        var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+        });
+        
+        // 创建HTTP内容
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
+        // 发送POST请求到嵌入向量端点
+        var response = await _httpClient.PostAsync("embeddings", content);
+        
+        // 确保请求成功
+        response.EnsureSuccessStatusCode();
+        
+        // 读取响应内容
+        var responseContent = await response.Content.ReadAsStringAsync();
+        
+        // 解析嵌入向量响应
+        using var doc = JsonDocument.Parse(responseContent);
+        var root = doc.RootElement;
+        
+        // 提取嵌入向量数据
+        if (root.TryGetProperty("data", out var dataArray) && 
+            dataArray.GetArrayLength() > 0 &&
+            dataArray[0].TryGetProperty("embedding", out var embeddingArray))
+        {
+            var embeddings = new List<float>();
+            foreach (var element in embeddingArray.EnumerateArray())
+            {
+                embeddings.Add(element.GetSingle());
+            }
+            return embeddings.AsReadOnly();
+        }
+        
+        throw new InvalidOperationException("Failed to extract embeddings from DashScope API response");
+    }
 }

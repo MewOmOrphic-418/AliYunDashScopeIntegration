@@ -1,40 +1,53 @@
 # WebApplication1 - AI服务集成示例
 
-这是一个集成了多种AI服务调用方式的ASP.NET Core Web应用程序示例。
+这是一个集成了Azure OpenAI SDK和阿里云百炼HTTP API的ASP.NET Core Web应用程序示例。
 
 ## 功能特性
 
-### 1. Azure OpenAI SDK 集成
-- 基于 Azure.AI.OpenAI SDK 2.1.0 版本
-- 支持聊天完成和嵌入向量功能
-- 面向对象的API设计
+- ✅ Azure OpenAI SDK 2.1.0 集成
+- ✅ 阿里云百炼HTTP API支持
+- ✅ 环境变量配置支持
+- ✅ 配置验证和错误处理
+- ✅ Swagger API文档
+- ✅ 服务健康检查
 
-### 2. 阿里云百炼HTTP调用（新增）
-- 直接HTTP POST调用阿里云百炼API
-- 兼容OpenAI格式的API端点
-- 支持自定义参数配置
+## 环境变量配置
 
-## 项目结构
+### 设置DASHSCOPE_API_KEY环境变量
 
-```
-WebApplication1/
-├── Controllers/
-│   └── TestController.cs          # 测试控制器
-├── Models/
-│   ├── AIConfig.cs               # Azure OpenAI配置模型
-│   └── DashScopeModels.cs        # 阿里云百炼模型（新增）
-├── Services/
-│   ├── IAIService.cs             # Azure OpenAI服务接口
-│   ├── AIService.cs              # Azure OpenAI服务实现
-│   ├── IDashScopeHttpService.cs  # 阿里云百炼服务接口（新增）
-│   └── DashScopeHttpService.cs   # 阿里云百炼服务实现（新增）
-├── Program.cs                    # 应用程序入口点
-└── appsettings.json             # 配置文件
+#### Windows PowerShell:
+```powershell
+$env:DASHSCOPE_API_KEY="your-api-key-here"
 ```
 
-## 配置说明
+#### Windows CMD:
+```cmd
+set DASHSCOPE_API_KEY=your-api-key-here
+```
 
-### appsettings.json 配置
+#### Linux/macOS:
+```bash
+export DASHSCOPE_API_KEY="your-api-key-here"
+```
+
+#### 永久设置环境变量
+
+**Windows:**
+1. 打开系统属性 → 高级 → 环境变量
+2. 在用户变量或系统变量中添加新变量
+3. 变量名: `DASHSCOPE_API_KEY`
+4. 变量值: 你的API密钥
+
+**Linux/macOS:**
+```bash
+# 添加到 ~/.bashrc 或 ~/.zshrc
+echo 'export DASHSCOPE_API_KEY="your-api-key-here"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+## 配置文件设置
+
+除了环境变量，你也可以在 `appsettings.json` 中配置：
 
 ```json
 {
@@ -47,148 +60,105 @@ WebApplication1/
 }
 ```
 
-**配置项说明：**
-- `Endpoint`: 阿里云百炼API基础URL
-- `ApiKey`: 阿里云百炼API密钥
-- `DeploymentName`: 部署名称（可选）
-- `ModelName`: 模型名称，默认为"qwen-plus"
+## API端点
 
-## API端点说明
+### 配置管理
+- `GET /api/config` - 查看当前AI配置状态
+- `POST /api/config/test-azure` - 测试Azure SDK服务
+- `POST /api/config/test-dashscope` - 测试阿里云百炼服务
+- `GET /api/config/environment` - 查看环境变量信息（开发环境）
 
-### 1. Azure OpenAI SDK 方式
-```
-POST /test/chat
-Content-Type: application/json
+### 主要功能端点
+- `POST /test/chat` - Azure OpenAI SDK方式
+- `POST /test/chat/dashscope` - 阿里云百炼HTTP方式
+- `POST /test/compare` - 对比两种服务的结果
+- `GET /test/hello` - 服务健康检查
 
-{
-  "prompt": "你好，世界！"
-}
-```
-
-### 2. 阿里云百炼HTTP方式（新增）
-```
-POST /test/chat/dashscope
-Content-Type: application/json
-
-{
-  "prompt": "你好，世界！"
-}
-```
-
-### 3. 对比测试端点（新增）
-```
-POST /test/compare
-Content-Type: application/json
-
-{
-  "prompt": "你好，世界！"
-}
-```
-
-### 4. 健康检查
-```
-GET /test/hello
-```
-
-## 使用示例
-
-### C# 客户端调用示例
-
-```csharp
-// 调用Azure OpenAI SDK方式
-var azureResponse = await httpClient.PostAsJsonAsync("/test/chat", 
-    new { prompt = "Hello, world!" });
-
-// 调用阿里云百炼HTTP方式
-var dashScopeResponse = await httpClient.PostAsJsonAsync("/test/chat/dashscope", 
-    new { prompt = "Hello, world!" });
-
-// 对比两种服务的结果
-var compareResponse = await httpClient.PostAsJsonAsync("/test/compare", 
-    new { prompt = "Hello, world!" });
-```
-
-### curl 命令示例
-
-```bash
-# Azure OpenAI SDK方式
-curl -X POST http://localhost:5000/test/chat \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"你好，世界！"}'
-
-# 阿里云百炼HTTP方式
-curl -X POST http://localhost:5000/test/chat/dashscope \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"你好，世界！"}'
-
-# 对比测试
-curl -X POST http://localhost:5000/test/compare \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"你好，世界！"}'
-```
-
-## 阿里云百炼HTTP调用详情
-
-### 请求格式
+### 示例请求体
 ```json
 {
-  "model": "qwen-plus",
-  "input": {
-    "messages": [
-      {
-        "role": "system",
-        "content": "You are a helpful assistant."
-      },
-      {
-        "role": "user",
-        "content": "你好，世界！"
-      }
-    ]
-  },
-  "parameters": {
-    "max_tokens": 1000,
-    "temperature": 0.7,
-    "stream": false
-  }
+  "prompt": "你好，世界！"
 }
 ```
 
-### 响应格式
-```json
-{
-  "output": {
-    "text": "你好！很高兴见到你。",
-    "finish_reason": "stop"
-  },
-  "usage": {
-    "input_tokens": 25,
-    "output_tokens": 12,
-    "total_tokens": 37
-  },
-  "request_id": "request-123456"
-}
-```
-
-## 错误处理
-
-所有API端点都包含完善的错误处理机制：
-- 500 Internal Server Error：服务内部错误
-- 详细错误信息包含在响应体中
-- 自动记录错误日志
-
-## 开发环境运行
-
-1. 确保安装了 .NET 10.0 SDK
-2. 配置正确的API密钥
-3. 运行以下命令：
+## 运行应用
 
 ```bash
+# 还原NuGet包
 dotnet restore
+
+# 构建项目
 dotnet build
+
+# 运行应用
 dotnet run
 ```
 
-4. 访问 `http://localhost:5000/swagger` 查看API文档
+访问 `http://localhost:5000/swagger` 查看API文档。
+
+## 配置验证
+
+应用启动时会自动验证配置：
+- 检查API密钥是否存在
+- 验证终结点URL格式
+- 记录配置状态到日志
+
+如果配置无效，开发环境下会返回详细错误信息。
+
+## 故障排除
+
+### 常见问题
+
+1. **API密钥未找到**
+   - 确认环境变量已正确设置
+   - 重启终端/IDE使环境变量生效
+   - 检查变量名拼写是否正确
+
+2. **配置验证失败**
+   - 查看应用启动日志
+   - 访问 `/api/config` 端点检查配置状态
+   - 确认appsettings.json配置正确
+
+3. **服务调用失败**
+   - 检查网络连接
+   - 验证API密钥有效性
+   - 确认终结点URL正确
+
+### 日志查看
+
+```bash
+# 开发环境运行时查看详细日志
+dotnet run --verbosity detailed
+```
+
+## 项目结构
+
+```
+WebApplication1/
+├── Controllers/           # API控制器
+│   ├── TestController.cs  # 原始测试控制器
+│   └── ConfigController.cs # 配置管理控制器
+├── Models/               # 数据模型
+│   ├── AIConfig.cs       # AI配置模型
+│   ├── ConfigurationExtensions.cs # 配置扩展方法
+│   └── DashScopeModels.cs # 百炼API模型
+├── Services/             # 业务服务
+│   ├── IAIService.cs     # Azure OpenAI服务接口
+│   ├── AIService.cs      # Azure OpenAI服务实现
+│   ├── IDashScopeHttpService.cs  # 阿里云百炼服务接口
+│   └── DashScopeHttpService.cs   # 阿里云百炼服务实现
+├── Middleware/           # 中间件
+│   └── ConfigurationValidationMiddleware.cs # 配置验证中间件
+├── Program.cs           # 应用入口点
+└── appsettings.json     # 配置文件
+```
+
+## 依赖项
+
+- .NET 8.0+
+- Azure.AI.OpenAI 2.1.0
+- Microsoft.Extensions.Http
+- Swashbuckle.AspNetCore
 
 ## 注意事项
 
@@ -204,3 +174,7 @@ dotnet run
 3. 添加更详细的监控和日志
 4. 实现负载均衡和故障转移
 5. 添加异步流式响应支持
+
+## 许可证
+
+MIT License

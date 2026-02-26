@@ -4,11 +4,11 @@ using OpenAI.Embeddings;
 namespace WebApplication1.Services;
 
 /// <summary>
-/// AI 服务接口
+/// Azure SDK AI 服务接口
 /// 定义了与 Azure OpenAI 服务交互的各种方法
-/// 包括聊天完成和文本嵌入向量生成功能
+/// 基于 OpenAI SDK 实现
 /// </summary>
-public interface IAIService
+public interface IAzureSDKService
 {
     /// <summary>
     /// 获取聊天完成结果

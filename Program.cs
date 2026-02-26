@@ -1,11 +1,15 @@
 using WebApplication1.Models;
 using WebApplication1.Services;
+using WebApplication1.Middleware;
 
 /// <summary>
 /// ASP.NET Core 应用程序入口点
 /// 配置服务容器、中间件管道和应用程序启动逻辑
 /// </summary>
 var builder = WebApplication.CreateBuilder(args);
+
+// 配置自定义配置源，支持从环境变量读取API密钥
+builder.Configuration.AddEnvironmentVariables();
 
 // 向服务容器添加所需的服务组件
 
@@ -27,10 +31,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
 // 配置 AI 服务相关组件
-// 从配置中读取 Azure OpenAI 相关设置
-builder.Services.Configure<AIConfig>(builder.Configuration.GetSection(AIConfig.SectionName));
-// 注册 AI 服务的单例实例
-builder.Services.AddSingleton<IAIService, AIService>();
+// 使用扩展方法从环境变量加载配置
+builder.Services.AddAIConfigurationFromEnvironment(builder.Configuration);
+
+// 注册 Azure SDK AI 服务的单例实例
+builder.Services.AddSingleton<IAzureSDKService, AzureSDKService>();
 
 // 注册阿里云百炼 HTTP 服务
 builder.Services.AddSingleton<IDashScopeHttpService, DashScopeHttpService>();
@@ -39,6 +44,10 @@ builder.Services.AddSingleton<IDashScopeHttpService, DashScopeHttpService>();
 var app = builder.Build();
 
 // 配置 HTTP 请求处理管道
+
+// 添加配置验证中间件（在开发环境中特别有用）
+app.UseConfigurationValidation();
+
 if (app.Environment.IsDevelopment())
 {
     // 开发环境下启用 Swagger UI

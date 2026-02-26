@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace WebApplication1.Services;
 
 /// <summary>
@@ -29,4 +34,11 @@ public interface IDashScopeHttpService
     /// <param name="request">完整的请求对象</param>
     /// <returns>原始响应对象</returns>
     Task<Models.DashScopeChatResponse> GetRawResponseAsync(Models.DashScopeChatRequest request);
+    
+    /// <summary>
+    /// 异步获取文本嵌入向量（数组格式）
+    /// </summary>
+    /// <param name="text">待转换的文本内容</param>
+    /// <returns>浮点数只读列表</returns>
+    Task<IReadOnlyList<float>> GetEmbeddingsAsync(string text);
 }

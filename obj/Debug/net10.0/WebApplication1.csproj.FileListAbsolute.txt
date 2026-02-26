@@ -40,3 +40,4 @@ d:\VS_Repos\WebApplication1\WebApplication1\bin\Debug\net10.0\Microsoft.Bcl.Asyn
 d:\VS_Repos\WebApplication1\WebApplication1\bin\Debug\net10.0\OpenAI.dll
 d:\VS_Repos\WebApplication1\WebApplication1\bin\Debug\net10.0\System.ClientModel.dll
 d:\VS_Repos\WebApplication1\WebApplication1\bin\Debug\net10.0\System.Memory.Data.dll
+d:\VS_Repos\WebApplication1\WebApplication1\obj\Debug\net10.0\WebApplication1.sourcelink.json
